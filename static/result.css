@@ -1,0 +1,36 @@
+p.search-info {
+    margin-bottom: 1em;
+    display: inline-block;
+    margin-left: 1em; 
+}
+/*ul {
+    overflow: hidden;
+    list-style: none;
+    display:inline-block;
+    padding-left: 1em;
+}*/
+div.img {
+    margin-left: 5em;
+    display: inline-block;
+}
+
+div.info {
+    display:inline-block;
+    margin-left: 2em;
+    margin-right: 3em;
+}
+
+div.paginator {
+    text-align: center;
+}
+
+input.page-goto {
+    border: none;
+    padding: 0;
+    width: 1em;
+    text-align: center;
+}
+
+h3.no-result{
+    text-align: center;
+}
