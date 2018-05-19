@@ -6,6 +6,7 @@ client = Elasticsearch(host='192.168.1.110')
 def index(request):
     return render(request,'index.html')
 
+# 搜索建议
 def suggest(request):
     search_word = request.GET.get('search_word')
     response = client.search(
@@ -38,13 +39,15 @@ def search(request):
         page_num = int(page_num)
     
         search_word = request.GET.get('search_word')
+        if len(search_word)<1:
+            raise Exception('请输入关键词')
         response = client.search(
                 index="movie",
                 body={
                     "query":{
                         "multi_match":{
                             "query":search_word,
-                            "fields":["title", "type", "introduction"]
+                            "fields":["title^3", "type", "introduction"]
                         }
                     },
                     "from":(page_num-1)*NUMS_PER_PAGE,
