@@ -33,6 +33,15 @@
 </body>
 
 <script>
+    var search_arr;
+    if(localStorage.search){
+        search_arr = localStorage.search.split(',');
+    }else{
+        search_arr = [];
+    }
+    if(search_arr.length>5){
+            search_arr.length=5;
+        }
     String.prototype.format = function(){
         var str = this;
         for(var i=0; i<arguments.length; i++){
@@ -40,9 +49,10 @@
         }
         return str;
     }
-    $(".search-input").bind("input propertychange", function(){
+    $("input.search-input").bind("input propertychange", function(){
         // 输入汉字会执行两次？？？？？
         var search_word = $(this).val();
+        // 输入词过短不发送ajax请求
            if(search_word.length<2){
                 $('.datalist').html('');
                 return;
@@ -60,8 +70,8 @@
                     {
                         if(data.suggest[i]!=''){
                             $('.datalist').append(
-                                '<li class="list-group-item"><a href="search?search_word={0}&page=1">{0}</a></li>'.format(data.suggest[i]));
-                            
+                                '<a class="list-group-item" href="search?search_word={0}&page=1">{1}</a>'.format(data.suggest[i], data.suggest[i].slice(0,20))
+                                );
                         }    
                     }
                 },
@@ -70,12 +80,6 @@
                 },
            })
         });
-    var search_arr;
-    if(localStorage.search){
-        search_arr = localStorage.search.split(',');
-    }else{
-        search_arr = [];
-    }
     // 移除重复值
     function removeByValue(arr, value){
         for(var i=0; i<arr.length; i++){
@@ -87,11 +91,8 @@
     }
     function search(){
         var search_word = $('input.search-input').val();
-        if(search_word.length <2){
+        if(search_word.length <1){
             return ;
-        }
-        if(search_arr.length>5){
-            search_arr.length=5;
         }
         $('#search').addClass('disabled');
         for(var i=0; i<search_arr.length; i++){
@@ -107,6 +108,22 @@
         window.location.href = url;
         $('#search').removeClass('disabled');
     }
+    // 显示搜索记录
+    $('.search-input').focus(function(){
+        $('ul.datalist').html('');
+        for(var i=0; i<search_arr.length; i++){
+            $('ul.datalist').append(
+                '<a class="list-group-item" href="search?search_word={0}&page=1"><span class="glyphicon glyphicon-time"></span>    {1}</a>'.format(search_arr[i], search_arr[i].slice(0, 20))
+                );
+        }
+    });
+    $('.search-input').blur(function(){
+        // 延迟失去焦点事件的执行
+        setTimeout(function(){
+            $('ul.datalist').html('');
+        }, 200);
+        
+    });
 </script>
 {% block script_area %}{% endblock %}
 </html>
