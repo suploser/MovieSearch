@@ -1,0 +1,93 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% block title %}搜索结果{% endblock %}
+{% block search_row %}col-md-4{% endblock %}
+{% block suggest_list %}hidden{% endblock %}
+{% block input_style %}margin-top:2em;margin-bottom:2em{% endblock %}
+{% block result %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4><span class="glyphicon glyphicon-fire"></span>&nbsp;&nbsp;大家都在搜</h4>
+                </div>
+                <div class="panel-body">
+                    123
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+             <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
+                    <span class="glyphicon glyphicon-search"></span>
+                    &nbsp;&nbsp;搜索到{{ search_count }}条结果
+                    </h4>
+                </div>
+                <div class="panel-body">
+                    {% if search_count == 0 %}
+                        <h3 class="no-result">无搜索结果!</h3>
+                    {% endif %}
+                </div>
+
+            </div>
+             <div class="paginator">
+                <ul class="pagination">
+                    {% if previous %}
+                        <li><a href="?search_word={{search_word}}&page={{page_num|add:-1}}">&laquo;</a></li>
+                    {% else %}
+                    <li  class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                    {% for page_item in page %}
+                    {% if page_item == page_num %}
+                        <li class="active"><span>{{page_item}}</span></li>
+                    {% else %}
+                        {% if page_item == '...' %}
+                            <li><span>{{page_item}}</span></li>
+                        {% else %}
+                            <li><a href="?search_word={{search_word}}&page={{page_item}}">{{page_item}}</a></li>
+                        {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                    {% if next %}
+                    <li>
+                        <a href="?search_word={{search_word}}&page={{page_num|add:1}}">&raquo;</a>
+                    </li>
+                    {% else %}
+                        <li  class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+                <ul class="pagination">
+                    <li><span><input  class="page-goto" type="text" value="1"></span></li>
+                    <li><span onclick="goto()">Go</span></li>
+                </ul>
+            </div>
+        </div>
+         
+        <div class="modal" id="movie_info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                         <h3>Thumbnail label</h3>
+                    </div>
+                    <div class="modal-body">
+
+                      <span class="glyphicon glyphicon-tag"></span><p class="search-info">123</p> 
+                    </div>
+                    <div class="modal-footer">
+                        <span class="glyphicon glyphicon-tag"></span><p class="search-info">123</p>    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script_area %}
+    <script>
+        function goto(){
+            var val = $('input.page-goto').val();
+            goto_url = '{% url "search" %}?search_word={{ search_word }}&page='+val;
+            window.location.href = goto_url;
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}just download{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'result.css' %}">
+    <script src="{% static 'jquery1.12.4.min.js' %}"></script>
+    <script src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="{% block search_row %}col-md-6 col-md-offset-3{% endblock %}">
+                <div class="input-group input-group-lg" style="{% block input_style %}margin-top: 15em{% endblock %}">
+                    <input type="text" class="form-control search-input" placeholder="search">
+                    <span class="input-group-btn">
+                        <button id="search" class="btn btn-default" type="button" onclick="search()">GO!</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="{% block suggest_list %}col-md-6 col-md-offset-3{% endblock %}">
+                <ul class="list-group datalist">
+                </ul>
+            </div>
+        </div>
+        {% block result %}{% endblock %}
+    </div>
+</body>
+
+<script>
+    String.prototype.format = function(){
+        var str = this;
+        for(var i=0; i<arguments.length; i++){
+            str = str.replace(new RegExp('\\{'+i+'\}', 'g'), arguments[i]);
+        }
+        return str;
+    }
+    $(".search-input").bind("input propertychange", function(){
+        // 输入汉字会执行两次？？？？？
+        var search_word = $(this).val();
+           if(search_word.length<2){
+                $('.datalist').html('');
+                return;
+           }
+           $.ajax({
+                url: "{% url 'suggest' %}",
+                type: 'GET',
+                data: {'search_word':search_word},
+                cache: false,
+                success: function(data){
+                    console.log(data.suggest);
+                    // 每次获取数据后清空ul
+                    $('.datalist').html('');
+                    for(var i=0;i<data.suggest.length;i++)
+                    {
+                        if(data.suggest[i]!=''){
+                            $('.datalist').append(
+                                '<li class="list-group-item"><a href="search?search_word={0}&page=1">{0}</a></li>'.format(data.suggest[i]));
+                            
+                        }    
+                    }
+                },
+                error: function(xhr){
+                    console.log(xhr);
+                },
+           })
+        });
+    var search_arr;
+    if(localStorage.search){
+        search_arr = localStorage.search.split(',');
+    }else{
+        search_arr = [];
+    }
+    // 移除重复值
+    function removeByValue(arr, value){
+        for(var i=0; i<arr.length; i++){
+            if(arr[i] === value){
+                arr.splice(i,1);
+            }
+        }
+        // return arr;
+    }
+    function search(){
+        var search_word = $('input.search-input').val();
+        if(search_word.length <2){
+            return ;
+        }
+        if(search_arr.length>5){
+            search_arr.length=5;
+        }
+        $('#search').addClass('disabled');
+        for(var i=0; i<search_arr.length; i++){
+            if(search_arr[i] === search_word){
+                removeByValue(search_arr, search_word);
+            }
+        }
+        // 点击搜索按钮后添加搜索记录保存至localStorge的search变量中
+        search_arr.unshift(search_word);
+        localStorage.search = search_arr;
+
+        url = "{% url 'search' %}?search_word="+search_word+"&page=1";
+        window.location.href = url;
+        $('#search').removeClass('disabled');
+    }
+</script>
+{% block script_area %}{% endblock %}
+</html>
