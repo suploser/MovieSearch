@@ -91,7 +91,7 @@
     }
     function search(){
         var search_word = $('input.search-input').val();
-        if(search_word.length <1){
+        if(search_word.length <1 || search_word.length > 20){
             return ;
         }
         $('#search').addClass('disabled');
@@ -122,7 +122,6 @@
         setTimeout(function(){
             $('ul.datalist').html('');
         }, 200);
-        
     });
 </script>
 {% block script_area %}{% endblock %}
