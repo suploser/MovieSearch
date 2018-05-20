@@ -26,58 +26,99 @@
                     </h4>
                 </div>
                 <div class="panel-body">
-                    {% if search_count == 0 %}
+                    {% if search_count != 0 %}
+                    {% for result in result_list %}
+                    <div class="movie-info-border">
+                        <div class="movie-info">
+                            <div style="float:left">
+                                <span data-toggle="modal" data-target="#myModal_{{ result.id }}">
+                                <img src="/static/img/{{ result.front_img_path }}" width="90px" class="img-responsive img-rounded  front-img" alt="..." data-toggle="tooltip" title="点击查看详情">
+                                </span>
+                                <div class="modal fade" id="myModal_{{ result.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                   <div class="modal-dialog" role="document">
+                                       <div class="modal-content">
+                                           <div class="modal-header">
+                                               <p>{{ result.title | safe }}</p>
+                                           </div>
+                                           <div class="modal-body">     
+                                                <img src="/static/img/{{result.front_img_path}}" class="img-responsive img-rounded" width="200px" alt="...">
+                                                <ul class="result-info-all">
+                                                    <li>简介:{{ result.introduction | safe}}</li>
+                                                    <li>类型:{{ result.type | safe}}</li>
+                                                    <li>影片来源: <a href="{{ result.url }}">{{ result.url }}</a></li>
+                                                    <li>豆瓣评分:{{ result.douban_score }}</li>
+                                                    <li>IMDb评分:{{ result.IMDb_score }}</li>
+                                                    <li>上映日期:{{result.age}}</li>
+                                                    <li><span class="pull-left">下载链接:</span>
+                                                        <ul class="download-url">
+                                                        {% for download_url in result.download_url %}
+                                                            {% if download_url == "暂无下载链接" %}
+                                                            <span>{{ download_url }}</span>
+                                                            {% else %}
+                                                                <span>{{download_url}}</span>&nbsp;&nbsp;<span class="glyphicon glyphicon-save 
+                                                                "></span><br>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                           </div>
+                                           <div class="modal-footer">
+                                           </div>
+                                       </div>
+                                   </div> 
+                                </div>
+                            </div>
+                            <div style="float:right">
+                                <ul class="result-info">
+                                    <li class="title">{{ result.title | safe}}</li>
+                                    <li>简介:{{ result.introduction | safe | striptags | truncatechars:30 }}</li>
+                                    <li>类型:{{ result.type | safe}}</li>
+                                    <li>影片来源: <a href="{{ result.url }}">{{ result.url }}</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                    {%else%}
                         <h3 class="no-result">无搜索结果!</h3>
                     {% endif %}
                 </div>
-
             </div>
-             <div class="paginator">
-                <ul class="pagination">
-                    {% if previous %}
-                        <li><a href="?search_word={{search_word}}&page={{page_num|add:-1}}">&laquo;</a></li>
-                    {% else %}
-                    <li  class="disabled"><span>&laquo;</span></li>
-                    {% endif %}
-                    {% for page_item in page %}
-                    {% if page_item == page_num %}
-                        <li class="active"><span>{{page_item}}</span></li>
-                    {% else %}
-                        {% if page_item == '...' %}
-                            <li><span>{{page_item}}</span></li>
+            <div class="row">
+                <div class="col-md-6 col-md-offset-5">
+                <div class="paginator">
+                    <ul class="pagination">
+                        {% if previous %}
+                            <li><a href="?search_word={{search_word}}&page={{page_num|add:-1}}">&laquo;</a></li>
                         {% else %}
-                            <li><a href="?search_word={{search_word}}&page={{page_item}}">{{page_item}}</a></li>
+                        <li  class="disabled"><span>&laquo;</span></li>
                         {% endif %}
-                    {% endif %}
-                    {% endfor %}
-                    {% if next %}
-                    <li>
-                        <a href="?search_word={{search_word}}&page={{page_num|add:1}}">&raquo;</a>
-                    </li>
-                    {% else %}
-                        <li  class="disabled"><span>&raquo;</span></li>
-                    {% endif %}
-                </ul>
-                <ul class="pagination">
-                    <li><span><input  class="page-goto" type="text" value="1"></span></li>
-                    <li><span onclick="goto()">Go</span></li>
-                </ul>
-            </div>
-        </div>
-         
-        <div class="modal" id="movie_info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                         <h3>Thumbnail label</h3>
-                    </div>
-                    <div class="modal-body">
-
-                      <span class="glyphicon glyphicon-tag"></span><p class="search-info">123</p> 
-                    </div>
-                    <div class="modal-footer">
-                        <span class="glyphicon glyphicon-tag"></span><p class="search-info">123</p>    
-                    </div>
+                        {% for page_item in page %}
+                        {% if page_item == page_num %}
+                            <li class="active"><span>{{page_item}}</span></li>
+                        {% else %}
+                            {% if page_item == '...' %}
+                                <li><span>{{page_item}}</span></li>
+                            {% else %}
+                                <li><a href="?search_word={{search_word}}&page={{page_item}}">{{page_item}}</a></li>
+                            {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        {% if next %}
+                        <li>
+                            <a href="?search_word={{search_word}}&page={{page_num|add:1}}">&raquo;</a>
+                        </li>
+                        {% else %}
+                            <li  class="disabled"><span>&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                    <ul class="pagination">
+                        <li><span><input  class="page-goto" type="text" value="1"></span></li>
+                        <li><span onclick="goto()">Go</span></li>
+                    </ul>
+                </div>
                 </div>
             </div>
         </div>
@@ -86,10 +127,18 @@
 {% block script_area %}
     <script>
         $('input.search-input').val("{{search_word}}");
+        // 跳转至指定页
         function goto(){
             var val = $('input.page-goto').val();
             goto_url = '{% url "search" %}?search_word={{ search_word }}&page='+val;
             window.location.href = goto_url;
         }
+        // 显示提示标签
+        $('img.front-img').tooltip();
+        // 下载按钮点击
+        $('.glyphicon-save').click(function(){
+            url = $(this).prev('span').text();
+            window.location.href = url;
+        });
     </script>
 {% endblock %}
