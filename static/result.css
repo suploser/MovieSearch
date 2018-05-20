@@ -9,16 +9,13 @@ p.search-info {
     display:inline-block;
     padding-left: 1em;
 }*/
-div.img {
-    margin-left: 5em;
-    display: inline-block;
-}
 
 div.info {
     display:inline-block;
     margin-left: 2em;
     margin-right: 3em;
 }
+
 
 div.paginator {
     text-align: center;
@@ -33,4 +30,64 @@ input.page-goto {
 
 h3.no-result{
     text-align: center;
+}
+
+img.front-img{
+    display: inline-block;
+}
+ul.result-info{
+    list-style: none;
+    display: inline-block;
+    margin-left: 0em;
+}
+ul.result-info-all{
+    list-style: none;
+    padding: 0;
+   /* display: inline-block;*/
+    margin-left: 0em;
+}
+ul.result-info li{
+    padding-bottom: 0.8em;
+}
+ul.result-info-all li{
+     padding-bottom: 0.8em;
+}
+ul.result-info li.title{
+    font-size: 1.5em;
+}
+span.search-word{
+    color: red;
+}
+div.movie-info {
+    display: inline-block;
+    margin-left: 1em;
+    padding-bottom: 1em;
+    padding-top: 1em;
+    /*border-bottom: solid 1px #ccc ; */
+}
+
+div.movie-info-border:not(:last-child) {
+    border-bottom: solid 1px #ccc ; 
+}
+
+div.modal-header p{
+    font-size: 1.5em;
+}
+
+div.modal-body img{
+    /*padding-bottom: 1em;*/
+    margin-bottom: 1em;
+}
+
+ul.download-url{
+    list-style: none;
+    display: inline-block;
+    padding: 0;
+}
+ul.download-url li{
+    padding-bottom: 0!important
+}
+span.glyphicon-save{
+    /*鼠标移到下载处光标变手形*/
+    cursor:pointer;
 }
