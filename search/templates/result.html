@@ -72,8 +72,9 @@
                             <div style="float:right">
                                 <ul class="result-info">
                                     <li class="title">{{ result.title | safe}}</li>
-                                    <li>简介:{{ result.introduction | safe | striptags | truncatechars:30 }}</li>
+                                    <!-- <li>简介:{{ result.introduction | safe | striptags | truncatechars:30 }}</li> -->
                                     <li>类型:{{ result.type | safe}}</li>
+                                    <li>上映日期:{{ result.age }}</li>
                                     <li>影片来源: <a href="{{ result.url }}">{{ result.url }}</a></li>
                                 </ul>
                             </div>
