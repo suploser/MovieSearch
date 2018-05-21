@@ -46,31 +46,58 @@ def search(request):
         if len(search_word)>20:
             raise Exception('关键词过长')
         start_time = time.time()
-        response = client.search(
-                index="movie",
-                body={
-                    "query":{
-                        "multi_match":{
-                            "query":search_word,
-                            "fields":["title^3", "type"]
-                        }
-                    },
-                    "from":(page_num-1)*NUMS_PER_PAGE,
-                    "size": NUMS_PER_PAGE,
-                    # 高亮
-                    "highlight": {
-                        "pre_tags": ["<span class=\"search-word\">"],
-                        "post_tags": ["</span>"],
-                        "fields": {
-                            "title": {},
-                            "type": {},
-                            "introduction": {}
+        # 使用缓存
+        if not cache.get(search_word+'_'+str(page_num)):
+            response = client.search(
+                    index="movie",
+                    body={
+                        "query":{
+                            "multi_match":{
+                                "query":search_word,
+                                "fields":["title^3", "type"]
+                            }
+                        },
+                        "from":(page_num-1)*NUMS_PER_PAGE,
+                        "size": NUMS_PER_PAGE,
+                        # 高亮
+                        "highlight": {
+                            "pre_tags": ["<span class=\"search-word\">"],
+                            "post_tags": ["</span>"],
+                            "fields": {
+                                "title": {},
+                                "type": {},
+                                "introduction": {}
+                            }
                         }
                     }
-                }
-            )
+                )
+            result_list = []
+            res = response['hits']['hits']
+             # 生成download_url的元组
+            def gen_list(url_list):
+                try:
+                    url_list += []
+                except:
+                    url_list = [url_list]
+                return url_list
+            for result in res:
+                result_list.append({
+                        'id': response.index(result),
+                        'title': result['highlight']['title'][0] if 'title' in result['highlight'] else result['_source']['title'],
+                        'type': result['highlight']['type'][0] if 'type' in result['highlight'] else result['_source']['type'],
+                        'introduction': result['highlight']['introduction'][0] if 'introduction' in result['highlight'] else result['_source']['introduction'],
+                        'download_url':gen_list(result['_source']['download_url']),
+                        'url': result['_source']['url'],
+                        'age': result['_source']['age'],
+                        'douban_score': result['_source']['douban_score'],
+                        'IMDb_score': result['_source']['IMDb_score'],
+                        'front_img_path' :result['_source']['front_img_path']
+                    })
+            cache.set(search_word+'_'+str(page_num), result_list , 60)
+            cache.set(str(search_word), response["hits"]["total"], 60)
         end_time = time.time()
-        search_count = response["hits"]["total"]
+        result_list = cache.get(search_word+'_'+str(page_num))
+        search_count = cache.get(str(search_word))
         if search_count == 0:
             MAX_PAGE = 1
         else:
@@ -92,33 +119,9 @@ def search(request):
             page.append('...')
             page.append(MAX_PAGE)
             
-        result_list = []
-        response = response['hits']['hits']
-        # 生成download_url的元组
-        def gen_list(url_list):
-            try:
-                url_list += []
-            except:
-                url_list = [url_list]
-            return url_list
-
-        for result in response:
-            result_list.append({
-                    'id': response.index(result),
-                    'title': result['highlight']['title'][0] if 'title' in result['highlight'] else result['_source']['title'],
-                    'type': result['highlight']['type'][0] if 'type' in result['highlight'] else result['_source']['type'],
-                    'introduction': result['highlight']['introduction'][0] if 'introduction' in result['highlight'] else result['_source']['introduction'],
-                    'download_url':gen_list(result['_source']['download_url']),
-                    'url': result['_source']['url'],
-                    'age': result['_source']['age'],
-                    'douban_score': result['_source']['douban_score'],
-                    'IMDb_score': result['_source']['IMDb_score'],
-                    'front_img_path' :result['_source']['front_img_path']
-                })
     except Exception as e:
         return render(request, 'message.html')
     
-   
     context = {}
     context['search_time'] = str(end_time - start_time)[:5]
     context['search_word'] = search_word
