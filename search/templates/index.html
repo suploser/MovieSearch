@@ -33,6 +33,7 @@
 </body>
 
 <script>
+
     var search_arr;
     if(localStorage.search){
         search_arr = localStorage.search.split(',');
@@ -83,7 +84,7 @@
     // 移除重复值
     function removeByValue(arr, value){
         for(var i=0; i<arr.length; i++){
-            if(arr[i] === value){
+            if(arr[i].trim() === value){
                 arr.splice(i,1);
             }
         }
@@ -100,7 +101,7 @@
                 removeByValue(search_arr, search_word);
             }
         }
-        // 点击搜索按钮后添加搜索记录保存至localStorge的search变量中
+        // 点击搜索按钮后添加搜索记录至localStorge的search变量中
         search_arr.unshift(search_word);
         localStorage.search = search_arr;
 
@@ -108,21 +109,33 @@
         window.location.href = url;
         $('#search').removeClass('disabled');
     }
-    // 显示搜索记录
+    // 输入框获得焦点后显示搜索记录
     $('.search-input').focus(function(){
         $('ul.datalist').html('');
         for(var i=0; i<search_arr.length; i++){
             $('ul.datalist').append(
-                '<a class="list-group-item" href="search?search_word={0}&page=1"><span class="glyphicon glyphicon-time"></span>    {1}</a>'.format(search_arr[i], search_arr[i].slice(0, 20))
+                '<a class="list-group-item" href="javascript:void(0);" ><span onclick="to(this)"><span class="glyphicon glyphicon-time"></span>    {1}</span><span class="glyphicon glyphicon-remove pull-right" onclick="remove_history(this)"></span></a>'.format(search_arr[i], search_arr[i].slice(0, 20))
                 );
         }
     });
-    $('.search-input').blur(function(){
-        // 延迟失去焦点事件的执行
-        setTimeout(function(){
-            $('ul.datalist').html('');
-        }, 200);
-    });
+    // $('.search-input').blur(function(){
+    //     // 延迟失去焦点事件的执行
+    //     setTimeout(function(){
+    //         $('ul.datalist').html('');
+    //     }, 500);
+    // });
+    function to(obj){
+        search_word = $(obj).text().trim();
+        window.location.href = '{% url "search" %}?search_word='+search_word+'&page=1';
+    }
+    // 清除历史记录
+    function remove_history(obj){
+        var val = $(obj).parent('a').text().trim();
+        $(obj).parent('a').addClass('hidden');
+        removeByValue(search_arr, val);
+        localStorage.search = search_arr;
+        // e.stopPropagation();
+    }
 </script>
 {% block script_area %}{% endblock %}
 </html>
