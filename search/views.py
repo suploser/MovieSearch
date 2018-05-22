@@ -48,7 +48,7 @@ def search(request):
             raise Exception('请输入关键词')
         if len(search_word)>20:
             raise Exception('关键词过长')
-        # 热搜统计,使用cookies判断是否为同一客户端
+        # 热搜统计,使用cookies判断是否为同一客户端，避免重复计数
         if not request.COOKIES.get(p.get_pinyin(search_word, '')):
             redis_client.zincrby('search_word', search_word)
         # 查询时间
@@ -143,5 +143,6 @@ def search(request):
     context['hot_search_word'] = [search_word.decode('utf-8')[:6] for search_word in hot_search_word]
     # 实现缓存，待续?
     response = render(request, 'result.html', context)
+    # 设置cookies
     response.set_cookie(p.get_pinyin(search_word, ''), 'true')
     return response
