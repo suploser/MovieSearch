@@ -7,22 +7,28 @@
 {% block input_style %}margin-top:2em;margin-bottom:2em{% endblock %}
 {% block result %}
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4><span class="glyphicon glyphicon-fire"></span>&nbsp;&nbsp;大家都在搜</h4>
                 </div>
                 <div class="panel-body">
-                    123
+                    <ul class="hot-search">
+                    {% for search_word in hot_search_word %}
+                        <li><a href="?search_word={{search_word}}&page=1">{{search_word}}</a></li>
+                    {% empty %}
+                        <li>暂无热搜!</li>
+                    {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-9">
              <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>
                     <span class="glyphicon glyphicon-search"></span>
-                    &nbsp;&nbsp;搜索到{{ search_count }}条结果
+                    &nbsp;&nbsp;搜索到{{ search_count }}条结果,用时{{ search_time }}s
                     </h4>
                 </div>
                 <div class="panel-body">
