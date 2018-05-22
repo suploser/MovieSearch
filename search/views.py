@@ -2,8 +2,10 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from elasticsearch import Elasticsearch
 from django.core.cache import cache
+from xpinyin import Pinyin
 import redis
 import time
+p = Pinyin()
 redis_client = redis.StrictRedis(host='192.168.1.110')
 client = Elasticsearch(host='192.168.1.110')
 # Create your views here.
@@ -46,11 +48,9 @@ def search(request):
             raise Exception('请输入关键词')
         if len(search_word)>20:
             raise Exception('关键词过长')
-        # 热搜统计
-        if not cache.get(str(search_word)):
+        # 热搜统计,使用cookies判断是否为同一客户端
+        if not request.COOKIES.get(p.get_pinyin(search_word, '')):
             redis_client.zincrby('search_word', search_word)
-            cache.set(str(search_word), search_word, 3600)
-        search_word = cache.get(str(search_word))
         # 查询时间
         start_time = time.time() 
         # 设置使用缓存
@@ -142,4 +142,6 @@ def search(request):
     context['search_count'] = search_count 
     context['hot_search_word'] = [search_word.decode('utf-8')[:6] for search_word in hot_search_word]
     # 实现缓存，待续?
-    return render(request, 'result.html', context)
+    response = render(request, 'result.html', context)
+    response.set_cookie(p.get_pinyin(search_word, ''), 'true')
+    return response
