@@ -50,6 +50,7 @@
         }
         return str;
     }
+    // 输入框变化事件
     $("input.search-input").bind("input propertychange", function(){
         // 输入汉字会执行两次？？？？？
         var search_word = $(this).val();
@@ -136,11 +137,13 @@
         localStorage.search = search_arr;
         // e.stopPropagation();
     }
-    $('#search').keydown(function(e){
-        if(e.keyCode == 13){
+    // 点击事件
+    document.onkeydown = function(e){
+        var e = e || window.event ||argument.callee.caller.arguments[0];
+        if(e && e.keyCode ==13){
             search();
         }
-    })
+    }
 </script>
 {% block script_area %}{% endblock %}
 </html>
