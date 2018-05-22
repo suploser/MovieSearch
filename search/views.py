@@ -2,7 +2,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from elasticsearch import Elasticsearch
 from django.core.cache import cache
+import redis
 import time
+redis_client = redis.StrictRedis(host='192.168.1.110')
 client = Elasticsearch(host='192.168.1.110')
 # Create your views here.
 def index(request):
@@ -39,14 +41,19 @@ def search(request):
     try:
         page_num = request.GET.get('page', 1)
         page_num = int(page_num)
-        
-        search_word = request.GET.get('search_word')
+        search_word = request.GET.get('search_word').strip()
         if len(search_word)<1:
             raise Exception('请输入关键词')
         if len(search_word)>20:
             raise Exception('关键词过长')
-        start_time = time.time()
-        # 使用缓存
+        # 热搜统计
+        if not cache.get(str(search_word)):
+            redis_client.zincrby('search_word', search_word)
+            cache.set(str(search_word), search_word, 3600)
+        search_word = cache.get(str(search_word))
+        # 查询时间
+        start_time = time.time() 
+        # 设置使用缓存
         if not cache.get(search_word+'_'+str(page_num)):
             response = client.search(
                     index="movie",
@@ -82,7 +89,7 @@ def search(request):
                 return url_list
             for result in res:
                 result_list.append({
-                        'id': response.index(result),
+                        'id': res.index(result),
                         'title': result['highlight']['title'][0] if 'title' in result['highlight'] else result['_source']['title'],
                         'type': result['highlight']['type'][0] if 'type' in result['highlight'] else result['_source']['type'],
                         'introduction': result['highlight']['introduction'][0] if 'introduction' in result['highlight'] else result['_source']['introduction'],
@@ -94,10 +101,12 @@ def search(request):
                         'front_img_path' :result['_source']['front_img_path']
                     })
             cache.set(search_word+'_'+str(page_num), result_list , 60)
-            cache.set(str(search_word), response["hits"]["total"], 60)
+            if not cache.get(str(search_word+'_count')):
+                cache.set(str(search_word)+'_count', response["hits"]["total"], 3600)
         end_time = time.time()
         result_list = cache.get(search_word+'_'+str(page_num))
-        search_count = cache.get(str(search_word))
+        search_count = cache.get(str(search_word)+'_count')
+        # 总页数
         if search_count == 0:
             MAX_PAGE = 1
         else:
@@ -120,8 +129,8 @@ def search(request):
             page.append(MAX_PAGE)
             
     except Exception as e:
-        return render(request, 'message.html')
-    
+        return render(request, 'message.html', { 'message':str(e) })
+    hot_search_word = redis_client.zrevrangebyscore('search_word', '+inf', '-inf', start=0, num=7)
     context = {}
     context['search_time'] = str(end_time - start_time)[:5]
     context['search_word'] = search_word
@@ -131,5 +140,6 @@ def search(request):
     context['page'] = page
     context['result_list'] = result_list
     context['search_count'] = search_count 
+    context['hot_search_word'] = [search_word.decode('utf-8')[:6] for search_word in hot_search_word]
     # 实现缓存，待续?
     return render(request, 'result.html', context)
