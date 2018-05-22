@@ -18,7 +18,7 @@ div.info {
 
 
 div.paginator {
-    /*text-align: center;*/
+    text-align: center;
 }
 
 input.page-goto {
@@ -90,4 +90,12 @@ ul.download-url li{
 span.glyphicon-save{
     /*鼠标移到下载处光标变手形*/
     cursor:pointer;
+}
+
+ul.hot-search {
+    list-style: none;   
+    padding-left: 1em; 
+}
+ul.hot-search li{
+    font-size:1.5em;
 }
